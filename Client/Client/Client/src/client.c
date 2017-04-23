@@ -557,7 +557,34 @@ EXIT:
    return status;
 }
 
+STATUS HandleInitialiseConnection(PCLIENT client)
+{
+   PMESSAGE newDetails;
+   STATUS status;
 
+   status = EXIT_SUCCESS_STATUS;
+   newDetails = NULL;
+
+   status = ReadMessage(client->pipeHandle, &newDetails);
+   if(!SUCCESS(status))
+   {
+      goto EXIT;
+   }
+
+   if(newDetails->messageType != INITIALISE_CONNECTION_RESPONSE)
+   {
+      status = UNKNOWN_REQUEST;
+      goto EXIT;
+   }
+
+   CloseHandle(client->pipeHandle);
+   client->pipeHandle = INVALID_HANDLE_VALUE;
+
+   status = CreatePipeInstance(newDetails->messageBuffer, &client->pipeHandle);
+
+EXIT:
+   return status;
+}
 
 
 
@@ -566,6 +593,12 @@ STATUS BeginSession(PCLIENT client)
    STATUS status;
 
    status = EXIT_SUCCESS_STATUS;
+
+   status = HandleInitialiseConnection(client);
+   if(!SUCCESS(status))
+   {
+      goto EXIT;
+   }
 
    status = HandleLoginRequest(client);
    if (!SUCCESS(status))

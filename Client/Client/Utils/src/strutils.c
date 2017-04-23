@@ -159,7 +159,7 @@ DWORD GetStatus(LPSTR buffer)
    idx = 0;
    size = strlen(buffer);
 
-   for(idx = 2; idx < strlen(buffer); ++idx)
+   for(idx = 2; idx < size; ++idx)
    {
       res *= 16;
       res += GetDigit(buffer[idx]);
